@@ -49,7 +49,7 @@ const httpRequestListener = function (request, response) {
         
             const user = JSON.parse(body);
 
-        users.push({
+            users.push({
             id : user.id,
             name : user.name,
             email : user.email,
@@ -60,7 +60,26 @@ const httpRequestListener = function (request, response) {
             response.end(JSON.stringify({ message : "userCreated" }))
         })
     } 
-    }   
+    }
+    if(method === "POST"){
+	    if(url === "/posts"){
+        let body = "";
+            request.on("data",(data)=>{body += data;})
+            request.on("end",()=> {
+        
+            const post = JSON.parse(body);
+
+            posts.push({
+            id : post.id,
+            title : post.title,
+            description : post.description,
+            userId : post.userId
+            })
+            response.writeHead(201, {"Content-Type" : "application/json"});
+            response.end(JSON.stringify({ message : "postCreated" }))
+        })
+    } 
+    }     
 }
 
 server.on("request", httpRequestListener);
