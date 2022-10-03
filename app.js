@@ -49,14 +49,14 @@ const data = [
     userId: 3,
     userName: "new user 1",
     postingId: 3,
-    postingImageUrl: "내용 1",
+    postingTitle: "내용 1",
     postingContent: "sampleContent3"
   },
   {  
     userId: 4,
     userName: "new user 2",
     postingId: 4,
-    postingImageUrl: "내용 2",
+    postingTitle: "내용 2",
     postingContent: "sampleContent4"
   }
 ];
@@ -86,11 +86,6 @@ const httpRequestListener = function (request, response) {
             password : user.password
             })
 
-            data.push({
-            userID: user.userID,
-            userName: user.userName,
-            })
-
             response.writeHead(201, {"Content-Type" : "application/json"});
             response.end(JSON.stringify({ message : "userCreated" }))
         })
@@ -106,26 +101,56 @@ const httpRequestListener = function (request, response) {
             const post = JSON.parse(body);
             const user = JSON.parse(body);
 
-            posts.push({
-            id : post.id,
-            title : post.title,
-            description : post.description,
-            userId : post.userId
-            })
+            if(data.userId !== post.userId){
+              posts.push({
+                id : post.id,
+                title : post.title,
+                description : post.description,
+                userId : post.userId
+                })
 
-            data.push({
-            postingId: post.id,
-            postingImageUrl: post.postingImageUrl,
-            postingTitle: post.title,
-            postingContent: post.description
-            })
+              data.push({
+                userId: post.userId,
+                userName: users[users.indexOf(post.userId, 0)],
+                postingId: post.id,
+                postingTitle: post.title,
+                postingContent: post.description
+            })}
+
+            if(data.userId == post.userId){
+              data.map(wordData => {
+                if(wordData.postingId == user.postingId){
+                  wordData.userId = (user.userId || wordData.userId);
+                  wordData.userName = (user.userName || wordData.userName);
+                  wordData.postingTitle = (user.postingTitle || wordData.postingTitle);
+                  wordData.postingContent = (user.postingContent || wordData.postingContent);
+                  }})}
             
             response.writeHead(201, {"Content-Type" : "application/json"});
             response.end(JSON.stringify({ message : "postCreated" }))
         })
       } 
       }
-      
+
+      if(method ==="PATCH"){
+        if(url === "/posts/edit"){
+          let body = "";
+          request.on("data",(data)=>{body += data;})
+          request.on("end",()=> {
+          const user = JSON.parse(body);
+                    
+          data.map(wordData => {
+              if(wordData.postingId == user.postingId){
+                  wordData.userId = (user.userId || wordData.userId);
+                  wordData.userName = (user.userName || wordData.userName);
+                  wordData.postingTitle = (user.postingTitle || wordData.postingTitle);
+                  wordData.postingContent = (user.postingContent || wordData.postingContent);
+                  }})
+            })
+            response.writeHead(201, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({message : "Edit posting"}))
+        }
+      }
 }
 
 server.on("request", httpRequestListener);
