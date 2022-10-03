@@ -69,6 +69,33 @@ const httpRequestListener = function (request, response) {
     	    response.writeHead(200, {"Content-Type": "application/json"});
           response.end(JSON.stringify({"data" :data}))
         }
+        if(url === "/user/post/inquire"){
+          let body = "";
+            const userLog = [];
+            request.on("data",(data)=>{body += data;})
+            request.on("end",()=>{
+              const user = JSON.parse(body);
+                const postLog = [];
+                data.map((inquire)=> {
+                  if(inquire.userId == user.userId){
+                    postLog.push(inquire)
+                    }
+            })
+                users.map((inquire)=> {
+                  if(user.userId == inquire.id){
+                      userLog.push({
+                          userID : inquire.id,
+                          userName : inquire.name,
+                            postings : postLog
+                })
+              }
+            })
+                result = {data : userBox[0]}
+                response.writeHead(200, { "Content-Type": "application/json"});
+                response.end(JSON.stringify(result));
+          })
+                        
+        }
 	  }
 
     if(method === "POST"){
@@ -149,6 +176,23 @@ const httpRequestListener = function (request, response) {
             })
             response.writeHead(201, {"Content-Type": "application/json"});
             response.end(JSON.stringify({message : "Edit posting"}))
+        }
+      }
+
+      if(method ==="DELETE"){
+        if(url === "/post/delete"){
+          let body = "";
+          request.on("data",(data)=>{body += data;})
+          request.on("end",()=> {
+            const user = JSON.parse(body);
+              data.map((deleted,index) => {
+                if(deleted.postingId == user.postingId){
+                  data.splice(index,1);
+                  }
+          })
+        })
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(JSON.stringify({message : "postingDeleted"}))
         }
       }
 }
